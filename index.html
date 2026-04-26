@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SaaS Review Dashboard</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+
+      body {
+        display: flex;
+        background: #f4f6f9;
+        color: #333;
+      }
+
+      /* SIDEBAR */
+      .sidebar {
+        width: 220px;
+        background: #111827;
+        color: white;
+        height: 100vh;
+        padding: 20px;
+        position: fixed;
+      }
+      .sidebar h2 {
+        margin-bottom: 30px;
+      }
+      .sidebar a {
+        display: block;
+        padding: 10px;
+        color: #cbd5e1;
+        text-decoration: none;
+        border-radius: 6px;
+        margin-bottom: 10px;
+      }
+      .sidebar a:hover {
+        background: #1f2937;
+        color: white;
+      }
+
+      /* MAIN */
+      .main {
+        margin-left: 220px;
+        width: 100%;
+        padding: 20px;
+      }
+
+      /* HEADER */
+      .header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+      select {
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+      }
+
+      /* CARDS */
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      }
+      .card h3 {
+        font-size: 14px;
+        color: #888;
+      }
+      .card p {
+        font-size: 24px;
+        font-weight: bold;
+        margin-top: 8px;
+      }
+
+      .positive {
+        color: #16a34a;
+      }
+      .negative {
+        color: #dc2626;
+      }
+
+      /* CHART */
+      .chart-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+      }
+      .chart {
+        display: flex;
+        align-items: flex-end;
+        gap: 30px;
+        height: 180px;
+        margin-top: 20px;
+      }
+      .bar {
+        width: 60px;
+        text-align: center;
+        color: white;
+        border-radius: 8px 8px 0 0;
+      }
+      .pos {
+        background: #22c55e;
+      }
+      .neg {
+        background: #ef4444;
+      }
+
+      /* REVIEWS */
+      .reviews {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+      }
+      .review {
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+      }
+      .review:last-child {
+        border-bottom: none;
+      }
+
+      .tag {
+        font-size: 12px;
+        padding: 3px 8px;
+        border-radius: 5px;
+        margin-left: 8px;
+      }
+      .tag.pos {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .tag.neg {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      /* MOBILE */
+      @media (max-width: 768px) {
+        .sidebar {
+          display: none;
+        }
+        .main {
+          margin-left: 0;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="sidebar">
+      <h2>📊 SaaS Panel</h2>
+      <a href="#">Dashboard</a>
+      <a href="#">Analytics</a>
+      <a href="#">Reviews</a>
+    </div>
+
+    <div class="main">
+      <div class="header">
+        <h1>Review Analytics</h1>
+        <select id="filter" onchange="updateUI()">
+          <option value="all">All Platforms</option>
+          <option value="amazon">Amazon</option>
+          <option value="flipkart">Flipkart</option>
+          <option value="myntra">Myntra</option>
+        </select>
+      </div>
+
+      <!-- CARDS -->
+      <div class="cards">
+        <div class="card">
+          <h3>Total Reviews</h3>
+          <p id="total"></p>
+        </div>
+        <div class="card">
+          <h3>Positive</h3>
+          <p id="positive" class="positive"></p>
+        </div>
+        <div class="card">
+          <h3>Negative</h3>
+          <p id="negative" class="negative"></p>
+        </div>
+      </div>
+
+      <!-- CHART -->
+      <div class="chart-card">
+        <h3>Sentiment Overview</h3>
+        <div class="chart">
+          <div id="posBar" class="bar pos"></div>
+          <div id="negBar" class="bar neg"></div>
+        </div>
+      </div>
+
+      <!-- REVIEWS -->
+      <div class="reviews">
+        <h3>Recent Reviews</h3>
+        <div id="reviewList"></div>
+      </div>
+    </div>
+
+    <script>
+      const reviews = [
+        {
+          text: "Amazing quality, worth every rupee!",
+          sentiment: "positive",
+          platform: "amazon",
+        },
+        {
+          text: "Terrible packaging, product damaged.",
+          sentiment: "negative",
+          platform: "flipkart",
+        },
+        {
+          text: "Loved the design and comfort.",
+          sentiment: "positive",
+          platform: "myntra",
+        },
+        {
+          text: "Not as described, disappointed.",
+          sentiment: "negative",
+          platform: "amazon",
+        },
+        {
+          text: "Super fast delivery!",
+          sentiment: "positive",
+          platform: "flipkart",
+        },
+        {
+          text: "Fabric feels cheap.",
+          sentiment: "negative",
+          platform: "myntra",
+        },
+        {
+          text: "Excellent performance!",
+          sentiment: "positive",
+          platform: "amazon",
+        },
+        {
+          text: "Battery drains quickly.",
+          sentiment: "negative",
+          platform: "flipkart",
+        },
+        {
+          text: "Fits perfectly, very happy.",
+          sentiment: "positive",
+          platform: "myntra",
+        },
+        { text: "Waste of money.", sentiment: "negative", platform: "amazon" },
+        {
+          text: "Highly recommend this!",
+          sentiment: "positive",
+          platform: "flipkart",
+        },
+        {
+          text: "Color faded after wash.",
+          sentiment: "negative",
+          platform: "myntra",
+        },
+        {
+          text: "Premium feel and great build.",
+          sentiment: "positive",
+          platform: "amazon",
+        },
+        {
+          text: "Customer support was useless.",
+          sentiment: "negative",
+          platform: "flipkart",
+        },
+        {
+          text: "Stylish and comfortable.",
+          sentiment: "positive",
+          platform: "myntra",
+        },
+      ];
+
+      function updateUI() {
+        const filter = document.getElementById("filter").value;
+
+        let filtered =
+          filter === "all"
+            ? reviews
+            : reviews.filter((r) => r.platform === filter);
+
+        const total = filtered.length;
+        const positive = filtered.filter(
+          (r) => r.sentiment === "positive",
+        ).length;
+        const negative = filtered.filter(
+          (r) => r.sentiment === "negative",
+        ).length;
+
+        document.getElementById("total").innerText = total;
+        document.getElementById("positive").innerText = positive;
+        document.getElementById("negative").innerText = negative;
+
+        // Chart %
+        const posPercent = total ? (positive / total) * 100 : 0;
+        const negPercent = total ? (negative / total) * 100 : 0;
+
+        const posBar = document.getElementById("posBar");
+        const negBar = document.getElementById("negBar");
+
+        posBar.style.height = posPercent + "%";
+        negBar.style.height = negPercent + "%";
+
+        posBar.innerText = Math.round(posPercent) + "%";
+        negBar.innerText = Math.round(negPercent) + "%";
+
+        // Reviews render
+        const list = document.getElementById("reviewList");
+        list.innerHTML = "";
+
+        filtered.slice(0, 8).forEach((r) => {
+          list.innerHTML += `
+      <div class="review">
+        <strong>${r.platform.toUpperCase()}</strong>
+        <span class="tag ${r.sentiment === "positive" ? "pos" : "neg"}">
+          ${r.sentiment}
+        </span>
+        <p>${r.text}</p>
+      </div>
+    `;
+        });
+      }
+
+      updateUI();
+    </script>
+  </body>
+</html>
